@@ -33,7 +33,6 @@ public class LinearRegression implements LearningAlgorithm {
 				b[i] += get(inst.vector, i) * inst.value;
 			}
 		}
-		a = inverse(a);
 		c = gauss(a, b);
 	}
 	
@@ -58,7 +57,7 @@ public class LinearRegression implements LearningAlgorithm {
 			result[0][0] = A[1][1] * invdet;
 			result[0][1] = -A[1][0] * invdet;
 			result[1][0] = -A[0][1] * invdet;
-			result[1][1] = A[1][1] * invdet;
+			result[1][1] = A[0][0] * invdet;
 			return result;
 		case 3:
 			determinant = A[0][0] * (A[1][1] * A[2][2] - A[2][1] * A[1][2])
@@ -97,12 +96,11 @@ public class LinearRegression implements LearningAlgorithm {
 			for (int i = row + 1; i < n; i++)
 				a[row][i] /= a[row][row];
 			b[row] /= a[row][row];
-			// a[row][row] = 1;
+			a[row][row] = 1;
 			for (int i = 0; i < n; i++) {
 				double x = a[i][row];
 				if (i != row && x != 0) {
-					// row + 1 instead of row is an optimization
-					for (int j = row + 1; j < n; j++)
+					for (int j = row; j < n; j++)
 						a[i][j] -= a[row][j] * x;
 					b[i] -= b[row] * x;
 				}
