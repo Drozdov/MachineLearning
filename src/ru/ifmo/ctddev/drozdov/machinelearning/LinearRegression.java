@@ -1,5 +1,6 @@
 package ru.ifmo.ctddev.drozdov.machinelearning;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class LinearRegression implements LearningAlgorithm {
@@ -18,6 +19,18 @@ public class LinearRegression implements LearningAlgorithm {
 	@Override
 	public void teach(List<Instance> instances) {
 		dim = instances.get(0).vector.size();
+		min = new double[dim];
+		max = new double[dim];
+		Arrays.fill(min, Double.MAX_VALUE);
+		Arrays.fill(max, Double.MIN_VALUE);
+		for (Instance instance : instances) {
+			for (int i = 0; i < dim; i++) {
+				if (min[i] > instance.vector.get(i))
+					min[i] = instance.vector.get(i);
+				if (max[i] < instance.vector.get(i))
+					max[i] = instance.vector.get(i);
+			}
+		}
 		if (free)
 			dim++;
 		double[][] a = new double[dim][dim];
@@ -33,15 +46,28 @@ public class LinearRegression implements LearningAlgorithm {
 				b[i] += get(inst.vector, i) * inst.value;
 			}
 		}
+		
+		//System.out.println(Arrays.deepToString(a));
+		
 		c = gauss(a, b);
+		
+		//System.out.println(c[0] + " " + c[1] + " " + c[2]);
 	}
 	
 	private double get(List<Double> list, int i) {
 		if (free) {
-			return i == 0 ? 1 : list.get(i - 1);
+			return i == 0 ? 1 : convert(list, i - 1);
 		} else {
-			return list.get(i);
+			return convert(list, i);
 		}
+	}
+	
+	private double min[], max[];
+
+	private double convert(List<Double> list, int i) {
+		//return list.get(i);
+		double val = list.get(i);
+		return (val - min[i]) / (max[i] - min[i]);
 	}
 	
 	public static double[][] inverse(double[][] A) {

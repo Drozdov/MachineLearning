@@ -18,7 +18,38 @@ public class KNN implements LearningAlgorithm {
 	
 	@Override
 	public void teach(List<Instance> examples) {
-		this.examples = examples;
+		int size = examples.size();
+		this.examples = examples.subList(0, 3 / 4 * size);
+		chooseK(examples.subList(3 / 4 * size, size));
+	}
+
+	private void chooseK(List<Instance> list) {
+		int k1 = 1, k4  = 100;
+		int k2 = (k1 + k4) / 3;
+		int k3 = (k1 + k4) * 2 / 3;
+		int v2, v3;
+		do {
+			v2 = test(k2, list);
+			v3 = test(k3, list);
+			if (v2 >= v3) {
+				k4 = k3;
+			} else {
+				k1 = k2;
+			}
+			k2 = k1 + (k4 - k1) / 3;
+			k3 = k1 + (k4 - k1) * 2 / 3;
+		} while (k3 - k2 > 1);
+		k = (v2 > v3 ? k2 : k3);
+		examples.addAll(list);
+	}
+	
+	private int test(int k, List<Instance> list) {
+		this.k = k;
+		int res = 0;
+		for (Instance inst : list) {
+			res += getResult(inst.vector) == inst.value ? 1 : 0;
+		}
+		return res;
 	}
 
 	@Override
