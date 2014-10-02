@@ -1,23 +1,104 @@
 package ru.ifmo.ctddev.drozdov.machinelearning;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
-
-import javax.lang.model.element.Element;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 public class AssotiativeRules {
 	
-	public static void main(String[] args) {
-		new AssotiativeRules().do1();
+	public static void main(String[] args) throws IOException {
+		AssotiativeRules ar = new AssotiativeRules();
+		BufferedReader in = new BufferedReader(new FileReader("supermarket.arff"));
+		String line;
+		while (!in.readLine().equals("@data"));
+		while ((line = in.readLine()) != null) {
+			String[] vals = line.split(",");
+			String product = vals[0];
+			Long basket = Long.parseLong(vals[3]);
+			ar.add(product, basket);
+		}
+		ar.calculate();
+		in.close();
 	}
 	
-	public void do1() {
-		AssotiativeElement elem = new AssotiativeElement(13);
-		elem.set(2);
-		elem.set(5);
-		elem.set(7);
-		elem.set(12);
-		for (int i = 0; i < 13; i++) {
-			System.out.println(i + " " + elem.get(i));
+	private Map<String, List<Long>> stat = new HashMap<>();
+	private Map<String, List<Long>> sortedStat = new TreeMap<>(new ValueComparator());
+	private Map<String, Integer> ids = new HashMap<>();
+	private List<Map<AssotiativeElement, List<Long>>> candidates = new ArrayList<>();
+	
+	public int MIN_SUPPORT = 5;
+	
+	private class ValueComparator implements Comparator<String> {
+
+	    public int compare(String a, String b) {
+	        int res = stat.get(b).size() - stat.get(a).size();
+	        if (res == 0)
+	        	return a.compareTo(b);
+	        return res;
+	    }
+	}
+	
+	public void add(String name, Long basket) {
+		if (stat.containsKey(name)) {
+			stat.get(name).add(basket);
+		} else {
+			List<Long> list = new ArrayList<>();
+			list.add(basket);
+			stat.put(name, list);
+		}
+	}
+
+	public void calculate() {
+		for (Entry<String, List<Long>> entry : stat.entrySet()) {
+			if (entry.getValue().size() < MIN_SUPPORT)
+				break;
+			Collections.sort(entry.getValue());
+			sortedStat.put(entry.getKey(), entry.getValue());
+		}
+		int i = 0;
+		int dim = sortedStat.size();
+		candidates.add(new HashMap<AssotiativeElement, List<Long>>());
+		for (Entry<String, List<Long>> entry : sortedStat.entrySet()) {
+			AssotiativeElement elem = new AssotiativeElement(dim);
+			candidates.get(0).put(elem, entry.getValue());
+			ids.put(entry.getKey(), i++);
+		}
+		i = 1;
+		boolean changing = true;
+		while (changing) {
+			changing = false;
+			candidates.add(new HashMap<AssotiativeElement, List<Long>>());
+			for (Entry<AssotiativeElement, List<Long>> entry : candidates.get(i - 1).entrySet()) {
+				for (int j = 0; j < dim; j++) {
+					if (!entry.getKey().get(j)) {
+						int k = 0;
+						int sum = 0;
+						AssotiativeElement ae = new AssotiativeElement(dim, i);
+						List<Long> list = candidates.get(0).get(ae);
+						for (long id : entry.getValue()) {
+							if (k < list.size())
+								break;
+							while (list.get(k) < id)
+								k++;
+							if (list.get(k) == id)
+								sum++;
+						}
+						if (sum > MIN_SUPPORT) {
+							
+						}
+					}
+				}
+			}
+			i++;
 		}
 	}
 	
@@ -27,6 +108,11 @@ public class AssotiativeRules {
 		
 		public AssotiativeElement(int dim) {
 			elements = new byte[dim / size + (dim % size == 0 ? 0 : 1)];
+		}
+		
+		public AssotiativeElement(int dim, int i) {
+			this(dim);
+			set(i);
 		}
 		
 		public boolean get(int i) {
