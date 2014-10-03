@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -33,9 +34,10 @@ public class AssotiativeRules {
 	private Map<String, List<Long>> stat = new HashMap<>();
 	private Map<String, List<Long>> sortedStat = new TreeMap<>(new ValueComparator());
 	private Map<String, Integer> ids = new HashMap<>();
-	private List<Map<AssotiativeElement, List<Long>>> candidates = new ArrayList<>();
+	private Map<Integer, String> revIds = new HashMap<>();
+	private List<Map<BitSet, List<Long>>> candidates = new ArrayList<>();
 	
-	public int MIN_SUPPORT = 5;
+	public int MIN_SUPPORT = 4;
 	
 	private class ValueComparator implements Comparator<String> {
 
@@ -56,6 +58,8 @@ public class AssotiativeRules {
 			stat.put(name, list);
 		}
 	}
+	
+	int dim;
 
 	public void calculate() {
 		for (Entry<String, List<Long>> entry : stat.entrySet()) {
@@ -65,42 +69,107 @@ public class AssotiativeRules {
 			sortedStat.put(entry.getKey(), entry.getValue());
 		}
 		int i = 0;
-		int dim = sortedStat.size();
-		candidates.add(new HashMap<AssotiativeElement, List<Long>>());
+		dim = sortedStat.size();
+		List<List<Long>> elements = new ArrayList<>();
+		candidates.add(new HashMap<BitSet, List<Long>>());
 		for (Entry<String, List<Long>> entry : sortedStat.entrySet()) {
-			AssotiativeElement elem = new AssotiativeElement(dim);
+			BitSet elem = new BitSet(dim);
+			elem.set(i, true);
 			candidates.get(0).put(elem, entry.getValue());
+			elements.add(entry.getValue());
+			revIds.put(i, entry.getKey());
 			ids.put(entry.getKey(), i++);
 		}
 		i = 1;
 		boolean changing = true;
 		while (changing) {
 			changing = false;
-			candidates.add(new HashMap<AssotiativeElement, List<Long>>());
-			for (Entry<AssotiativeElement, List<Long>> entry : candidates.get(i - 1).entrySet()) {
-				for (int j = 0; j < dim; j++) {
-					if (!entry.getKey().get(j)) {
+			candidates.add(new HashMap<BitSet, List<Long>>());
+			for (Entry<BitSet, List<Long>> entry : candidates.get(i - 1).entrySet()) {
+				int start = 0;
+				BitSet key = entry.getKey();
+				for (int j = dim - 1; j > 0; j--) {
+					if (key.get(j))
+					{
+						start = j;
+						break;
+					}
+				}
+				for (int j = start; j < dim; j++) {
+					if (!key.get(j)) {
 						int k = 0;
 						int sum = 0;
-						AssotiativeElement ae = new AssotiativeElement(dim, i);
-						List<Long> list = candidates.get(0).get(ae);
+						List<Long> list = elements.get(j);
+						List<Long> res = new ArrayList<>();
 						for (long id : entry.getValue()) {
-							if (k < list.size())
-								break;
-							while (list.get(k) < id)
+							while (k < list.size() && list.get(k) < id)
 								k++;
-							if (list.get(k) == id)
+							if (k < list.size() && list.get(k) == id) {
+								res.add(id);
 								sum++;
+							}
 						}
 						if (sum > MIN_SUPPORT) {
-							
+							changing = true;
+							BitSet element = new BitSet(dim);
+							element.or(key);
+							element.set(j, true);
+							candidates.get(i).put(element, res);
 						}
 					}
 				}
 			}
 			i++;
 		}
+		
+		Map<BitSet, BitSet> result = new HashMap<>();
+		
+		for (int j = 1; j < candidates.size(); j++) {
+			for (BitSet bs : candidates.get(j).keySet()) {
+				assocRules(result, bs, new BitSet(dim));
+			}
+		}
+		
+		System.err.println(result.size());
+		
+		for (Entry<BitSet, BitSet> entry : result.entrySet()) {
+			BitSet key = entry.getKey();
+			BitSet value = entry.getValue();
+			System.out.println("--------");
+			System.out.println(key.cardinality());
+			for (int j = key.nextSetBit(0); j != -1; j = key.nextSetBit(j + 1)) {
+				System.out.println(revIds.get(j));
+			}
+			System.out.println("-->");
+			for (int j = value.nextSetBit(0); j != -1; j = value.nextSetBit(j + 1)) {
+				System.out.println(revIds.get(j));
+			}
+		}
+		
 	}
+	
+	private void assocRules(Map<BitSet, BitSet> r,
+			BitSet fi, BitSet y) {
+		int min = Math.max(0, y.previousSetBit(dim - 1));
+		for (int j = fi.nextSetBit(min); j != -1; j = y.nextSetBit(j + 1)) {
+				BitSet fi_ = new BitSet(dim);
+				fi_.or(fi);
+				fi_.set(j, false);
+				BitSet y_ = new BitSet(dim);
+				y_.or(y);
+				y_.set(j, true);
+				int s1 = candidates.get(fi.cardinality() - 1).get(fi).size();
+				int s2 = candidates.get(fi_.cardinality() - 1).get(fi_).size();
+				if (s1 * 6 < s2) {
+					r.put(fi_, y_);
+					if (fi_.cardinality() > 1) {
+						assocRules(r, fi_, y_);
+					}
+				}
+		}
+	}
+	
+	
 	
 	class AssotiativeElement {
 		private byte[] elements;
@@ -113,6 +182,14 @@ public class AssotiativeRules {
 		public AssotiativeElement(int dim, int i) {
 			this(dim);
 			set(i);
+		}
+		
+		public AssotiativeElement(AssotiativeElement element) {
+			/*elements = new byte[element.elements.length];
+			for (int i = 0; i < element.elements.length; i++) {
+				elements[i] = element.elements[i];
+			}*/
+			elements = Arrays.copyOf(element.elements, element.elements.length);
 		}
 		
 		public boolean get(int i) {
@@ -138,6 +215,14 @@ public class AssotiativeRules {
 				return false;
 			AssotiativeElement e = (AssotiativeElement)o;
 			return Arrays.equals(e.elements, elements);
+		}
+		
+		public boolean isEmpty() {
+			for (byte b : elements)
+				if (b == 0) {
+					return false;
+				}
+			return true;
 		}
 		
 	}

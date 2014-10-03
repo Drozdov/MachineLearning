@@ -10,7 +10,7 @@ public class LogisticRegression implements FuzzyLearningAlgorithm {
 	private final static double ALPHA = 0.05;
 	private boolean free;
 	private final static int MAX_ITERS = 10000000;
-	private final static double LAMBDA = 0.0015;
+	private final static double LAMBDA = 0.0025;
 	
 	public LogisticRegression(int dim, boolean free) {
 		this.dim = dim;
@@ -54,7 +54,7 @@ public class LogisticRegression implements FuzzyLearningAlgorithm {
 			}
 		}
 		for (int i = 0; i < dim; i++) {
-			res[i] -= 2 * LAMBDA * teta[i];
+			res[i] -= LAMBDA * teta[i];
 		}
 		return res;
 	}
