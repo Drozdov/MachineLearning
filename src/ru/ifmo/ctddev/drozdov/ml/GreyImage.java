@@ -8,6 +8,7 @@ import java.awt.image.Raster;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -119,5 +120,15 @@ public class GreyImage implements Recognizable {
 	
 	public int height() {
 		return height;
+	}
+	
+	public void draw(PrintStream out) {
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				int val = getPixel(i, j);
+				out.print(String.format("%2X ", val));
+			}
+			out.println();
+		}
 	}
 }

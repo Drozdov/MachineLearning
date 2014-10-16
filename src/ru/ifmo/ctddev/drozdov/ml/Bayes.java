@@ -36,9 +36,14 @@ public class Bayes {
 			int key = e.getKey();
 			double v1 = spam.containsKey(key) ? spam.get(key) : 0;
 			double val = e.getValue();
-			weights.put(key, 1. * (v1 + 0.00001) / (val + 0.00002));
+			weights.put(key, 1. * (v1 + 1) / (val + 2));
 		}
-		int right = 0, wrong = 0;
+		
+		int rightpos = 0;
+		int wrongpos = 0;
+		int rightneg = 0;
+		int wrongneg = 0;
+		
 		for (File directory : test)
 		{
 			for (File f : directory.listFiles()) {
@@ -55,14 +60,26 @@ public class Bayes {
 					sum += Math.log((1 - weight) / weight); 
 				}
 				boolean res = sum > 0;
-				if (res ^ isSpam)
-					right++;
-				else
-					wrong++;
+				if (res && !isSpam) {
+					rightpos++;
+				} else if (res && isSpam) {
+					rightneg++;
+				} else if (!res && !isSpam) {
+					wrongpos++;
+				} else {
+					wrongneg++;
+				}
 				in.close();
 			}
 		}
-		System.out.println(right + " " + wrong);
+		System.out.println("Accuracy: " + 100 * (rightpos + wrongneg) / (rightpos + wrongpos + rightneg + wrongneg));
+		int prec = 100 * rightpos / (rightpos + rightneg);
+		System.out.println("Precision: " + prec);
+		int rec = 100 * rightpos / (rightpos + wrongpos);
+		System.out.println("Recall: " + rec);
+		System.out.println("F1: " + Math.sqrt(prec * rec));
+
+		
 		
 	}
 

@@ -68,8 +68,14 @@ public abstract class AbstractMLMethod {
 			System.out.println("Testing...");
 		int count = 0;
 		for (int i = 0; i < size; i++) {
-			if (getResult(testImages[i]) == testLabels[i])
+			int res = getResult(testImages[i]);
+			if (res == testLabels[i])
 				count++;
+			else {
+			System.out.println("Expected: " + testLabels[i] + ", calculated: " + res);	
+			((GreyImage)testImages[i]).draw(System.out);
+			System.out.println();
+			}
 		}
 		return (double) count / size;
 	}

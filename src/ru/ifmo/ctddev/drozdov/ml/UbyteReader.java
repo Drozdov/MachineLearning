@@ -18,7 +18,7 @@ public class UbyteReader {
 		this.fileName = fileName;
 		in = new DataInputStream(new FileInputStream(fileName));
 		type = in.readInt();
-		itemsNumber = in.readInt();
+		itemsNumber = in.readInt();itemsNumber /= 10; // =)
 	}
 	
 	public int getType() {

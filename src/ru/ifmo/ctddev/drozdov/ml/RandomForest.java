@@ -35,13 +35,17 @@ public class RandomForest {
 				System.err.println("Invalid label");	
 			}
 		}
-		RandomForest tree = new RandomForest(19, 1000, category.get(0).length);
+		//BinaryDecisionTree tree = new BinaryDecisionTree();
+		RandomForest tree = new RandomForest(11, 100, category.get(0).length);
 		tree.teach(category.toArray(new int[category.size()][]),
 				complement.toArray(new int[category.size()][]));
 		
 		
-		int right = 0;
-		int wrong = 0;
+		int rightpos = 0;
+		int wrongpos = 0;
+		int rightneg = 0;
+		int wrongneg = 0;
+		
 		while ((line = inTestData.readLine()) != null) {
 			String[] strNumbers = line.split("\\s+");
 			int[] numbers = new int[strNumbers.length];
@@ -54,15 +58,15 @@ public class RandomForest {
 			{
 			case 1:
 				if (res)
-					right++;
+					rightpos++;
 				else
-					wrong++;
+					wrongpos++;
 				break;
 			case -1:
 				if (res)
-					wrong++;
+					rightneg++;
 				else
-					right++;
+					wrongneg++;
 				break;
 			default:
 				System.err.println("Invalid label");	
@@ -74,7 +78,12 @@ public class RandomForest {
 		inTestData.close();
 		inTestLabels.close();
 		
-		System.out.println(right + " " + wrong);
+		System.out.println("Accuracy: " + 100 * (rightpos + wrongneg) / (rightpos + wrongpos + rightneg + wrongneg));
+		int prec = 100 * rightpos / (rightpos + rightneg);
+		System.out.println("Precision: " + prec);
+		int rec = 100 * rightpos / (rightpos + wrongpos);
+		System.out.println("Recall: " + rec);
+		System.out.println("F1: " + Math.sqrt(prec * rec));
 
 		
 	}

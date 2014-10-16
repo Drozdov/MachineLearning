@@ -1,6 +1,6 @@
 package ru.ifmo.ctddev.drozdov.ml;
 
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -85,7 +85,7 @@ public class BinaryDecisionTree {
 				}
 			}
 			for (int c = 0; c < MAX_SIZE; c++) {
-				min = updateChosen(j, 1, size1, size2, countsCat[c], countsCompl[c], min);
+				min = updateChosen(j, c, size1, size2, countsCat[c], countsCompl[c], min);
 			}
 		}
 	}
@@ -112,6 +112,11 @@ public class BinaryDecisionTree {
 		double pr = 1 - pl;
 		double p1 = (double) catCount / (catCount + complCount);
 		double p2 = (double) notCatCount / (notCatCount + notComplCount);
+		if (catCount == 0 && complCount == 0)
+			return 1024;
+		if (notCatCount == 0 && notComplCount == 0)
+			return 1024;
+		
 		if (useGini)
 			return pl * gini(p1) + pr * gini(p2);
 		return pl * entropy(p1) + pr * entropy(p2);
@@ -141,8 +146,10 @@ public class BinaryDecisionTree {
 		devideByChosen(complement, complementL, complementR);
 		left = new BinaryDecisionTree(categoryL.toArray(new int[categoryL.size()][]),
 				complementL.toArray(new int[complementL.size()][]));
+		left.signs = signs;
 		right = new BinaryDecisionTree(categoryR.toArray(new int[categoryR.size()][]),
 				complementR.toArray(new int[complementR.size()][]));
+		right.signs = signs;
 		if (maxHeight > 0) {
 			left.setMaxHeight(maxHeight - 1);
 			right.setMaxHeight(maxHeight - 1);
@@ -189,11 +196,15 @@ public class BinaryDecisionTree {
 	}
 
 	protected boolean needsDeviding() {
-		if (maxHeight == 0)
-			return false;
+		//if (maxHeight == 0)
+		//	return false;
 		int size1 = category.length;
 		int size2 = complement.length;
+		//System.err.println(size1 + " " + size2);
+		if (size1 == 0 || size2 == 0)
+			return false;
 		return entropy((double) size1 / (size1 + size2)) > MIN_ENTROPY;
+		//return size1 > 0 && size2 > 0;
 	}
 
 	private void updateDecision() {
@@ -248,23 +259,23 @@ public class BinaryDecisionTree {
 		return 1 + (left == null ? 0 : left.getTotalSize()) + (right == null ? 0 : right.getTotalSize());
 	}
 
-	public void print(PrintWriter out) {
+	public void print(PrintStream out) {
 		out.println(this.getClass().getSimpleName());
 		printingDfs(out);
 		out.flush();
 	}
 	
-	protected void printingDfs(PrintWriter out) {
+	protected void printingDfs(PrintStream out) {
 		out.println(decision + " " + chosen);
 		if (left != null) {
 			left.printingDfs(out);
 		} else {
-			out.println();
+			//out.println();
 		}
 		if (right != null) {
 			right.printingDfs(out);
 		} else {
-			out.println();
+			//out.println();
 		}
 	}
 
