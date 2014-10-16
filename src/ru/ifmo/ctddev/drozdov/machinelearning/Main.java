@@ -11,6 +11,13 @@ import java.util.List;
 public class Main {
 
 	public static void main(String[] args) throws IOException {
+		BufferedReader in = new BufferedReader(new FileReader("random_forest/arcene_train.data"));
+		String line;
+		while ((line = in.readLine()) != null) {
+			System.out.println(line.split("\\s").length);
+		}
+		in.close();
+		
 		testLogisticRegression();	
 		//testKnn();
 		//testLinearRegression();
