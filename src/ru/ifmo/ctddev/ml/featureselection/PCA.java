@@ -7,10 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jfree.ui.RefineryUtilities;
-import org.jfree.util.ArrayUtilities;
 
-import testers.SampleXYDataset2;
-import testers.ScatterPlotDemo1;
+import testers.SampleXYDataset;
+import testers.ScatterPlot;
 import Jama.Matrix;
 import Jama.SingularValueDecomposition;
 
@@ -18,7 +17,7 @@ public class PCA {
 	public static void main(String[] args) throws IOException {
 		PCA pca = new PCA();
 		List<double[]> values = new ArrayList<>();
-		BufferedReader in = new BufferedReader(new FileReader("pca/newBasis1"));
+		BufferedReader in = new BufferedReader(new FileReader("pca/newBasis2"));
 		while (in.ready()) {
 			String line = in.readLine();
 			if (line == null || line.isEmpty())
@@ -60,24 +59,35 @@ public class PCA {
 		
 		Matrix X = new Matrix(valsT);
 		SingularValueDecomposition svd = X.svd();
-		double[] singularValues = svd.getSingularValues();
-		for (double d : singularValues) {
+		
+		for (double d : svd.getSingularValues()) {
 			System.out.println(d);
-			
 		}
 		
 		double[] ds0 = svd.getU().getArray()[0];
-		double[] ds1 = svd.getU().getArray()[0];
+		double[] ds1 = svd.getU().getArray()[1];
+ 		
+		Double[] x = new Double[vals.length], y = new Double[vals.length];
 		
-		Double[] d0 = new Double[ds0.length];
+		for (int i = 0; i < vals.length; i++) {
+			x[i] = 0.;
+			y[i] = 0.;
+			for (int j = 0; j < size; j++) {
+				x[i] += (vals[i][j] - medians[j]) * ds0[j];
+				y[i] += (vals[i][j] - medians[j]) * ds1[j];
+			}
+		}
+		
+		/*Double[] d0 = new Double[ds0.length];
 		Double[] d1 = new Double[ds1.length];
 		
 		for (int i = 0; i < ds0.length; i++) {
 			d0[i] = ds0[i];
 			d1[i] = ds1[i];
-		}
+		}*/
 		
-        ScatterPlotDemo1 demo = new ScatterPlotDemo1("Scatter Plot Demo 1", new SampleXYDataset2(1, d0, d1));
+        ScatterPlot demo = new ScatterPlot("Scatter Plot", 
+        		new SampleXYDataset(1, x, y));
         demo.pack();
         RefineryUtilities.centerFrameOnScreen(demo);
         demo.setVisible(true);
@@ -93,11 +103,11 @@ public class PCA {
 		
 	}
 	
-	private double covariation(double[] vec1, double med1, double[] vec2, double med2) {
+	/*private double covariation(double[] vec1, double med1, double[] vec2, double med2) {
 		double res = 0;
 		for (int i = 0; i < vec1.length; i++) {
 			res += (vec1[i] - med1) * (vec2[i] - med2);
 		}
 		return res / vec1.length;
-	}
+	}*/
 }

@@ -20,7 +20,8 @@ import org.jfree.data.xy.XYDataset;
  * for demo purposes - it is NOT intended to show how you should go about 
  * writing your own datasets.
  */
-public class SampleXYDataset2 extends AbstractXYDataset 
+@SuppressWarnings("serial")
+public class SampleXYDataset extends AbstractXYDataset 
         implements XYDataset, DomainInfo, RangeInfo {
 
     /** The series count. */
@@ -66,7 +67,7 @@ public class SampleXYDataset2 extends AbstractXYDataset
      * Creates a sample dataset using default settings (4 series, 100 data items per series,
      * random data in the range 0 - 200).
      */
-    public SampleXYDataset2() {
+    public SampleXYDataset() {
         this(DEFAULT_SERIES_COUNT, DEFAULT_ITEM_COUNT);
     }
     
@@ -75,7 +76,7 @@ public class SampleXYDataset2 extends AbstractXYDataset
      * @param seriesCount
      * @param values
      */
-    public SampleXYDataset2(int seriesCount, Double[]... values) {
+    public SampleXYDataset(int seriesCount, Double[]... values) {
     	this.seriesCount = seriesCount;
     	this.itemCount = 0;
     	this.xValues = new Double[seriesCount][];
@@ -121,8 +122,7 @@ public class SampleXYDataset2 extends AbstractXYDataset
      * @param seriesCount  the number of series.
      * @param itemCount  the number of items.
      */
-    public SampleXYDataset2(int seriesCount, int itemCount) {
-
+    public SampleXYDataset(int seriesCount, int itemCount) {
         this.xValues = new Double[seriesCount][itemCount];
         this.yValues = new Double[seriesCount][itemCount];
         this.seriesCount = seriesCount;
@@ -207,7 +207,8 @@ public class SampleXYDataset2 extends AbstractXYDataset
      *
      * @return The key for the series.
      */
-    public Comparable getSeriesKey(int series) {
+    @SuppressWarnings("rawtypes")
+	public Comparable getSeriesKey(int series) {
         return "Sample " + series;
     }
 

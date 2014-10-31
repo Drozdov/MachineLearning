@@ -25,14 +25,15 @@ import org.jfree.ui.RefineryUtilities;
 /**
  * A demo scatter plot.
  */
-public class ScatterPlotDemo1 extends ApplicationFrame {
+@SuppressWarnings("serial")
+public class ScatterPlot extends ApplicationFrame {
 
     /**
      * A demonstration application showing a scatter plot.
      *
      * @param title  the frame title.
      */
-    public ScatterPlotDemo1(String title, XYDataset dataset) {
+    public ScatterPlot(String title, XYDataset dataset) {
         super(title);
         JPanel chartPanel = createDemoPanel(dataset);
         chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
@@ -88,7 +89,7 @@ public class ScatterPlotDemo1 extends ApplicationFrame {
      * @param args  ignored.
      */
     public static void main(String[] args) {
-        ScatterPlotDemo1 demo = new ScatterPlotDemo1("Scatter Plot Demo 1", new SampleXYDataset2());
+        ScatterPlot demo = new ScatterPlot("Scatter Plot Demo 1", new SampleXYDataset());
         demo.pack();
         RefineryUtilities.centerFrameOnScreen(demo);
         demo.setVisible(true);
