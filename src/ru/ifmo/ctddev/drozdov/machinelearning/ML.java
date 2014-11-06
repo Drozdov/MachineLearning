@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-public class Main {
+public class ML {
 
 	public static void main(String[] args) throws IOException {
 		BufferedReader in = new BufferedReader(new FileReader("random_forest/arcene_train.data"));
@@ -45,7 +45,7 @@ public class Main {
 		test(classifier, tests);
 	}
 	
-	static void test(LearningAlgorithm classifier, List<Instance> tests) {
+	public static void test(LearningAlgorithm classifier, List<Instance> tests) {
 		if (classifier instanceof LinearRegression) {
 			double diff = 0;
 			for (Instance test : tests) {

@@ -7,7 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class RandomForest {
+import ru.ifmo.ctddev.drozdov.machinelearning.Instance;
+import ru.ifmo.ctddev.drozdov.machinelearning.LearningAlgorithm;
+
+public class RandomForest implements LearningAlgorithm {
 	public static void main(String[] args) throws IOException {
 		BufferedReader inTrainData = new BufferedReader(new FileReader("random_forest/arcene_train.data"));
 		BufferedReader inTrainLabels = new BufferedReader(new FileReader("random_forest/arcene_train.labels"));
@@ -120,6 +123,18 @@ public class RandomForest {
 				no++;
 		}
 		return yes > no;
+	}
+
+	@Override
+	public void teach(List<Instance> examples) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int getResult(List<Double> vector) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 	
 	
